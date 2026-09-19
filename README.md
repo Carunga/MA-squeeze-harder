@@ -57,11 +57,13 @@ tightest result use a wired player as the group leader.
 
 ## Notes / caveats
 
-- On first provider load MA fetches the patched `aioslimproto` from
-  `github.com/Carunga/aioslimproto` via the manifest `requirements` entry
-  (`aioslimproto @ git+https://...@<sha>`), installed with `uv`. This needs
-  outbound HTTPS to GitHub at that moment; it is cached in the `/data` volume's
-  environment afterwards.
+- On first provider load MA installs the patched `aioslimproto` from
+  `github.com/Carunga/aioslimproto` (the manifest `requirements` entry, pinned to
+  a commit) into the container's venv with `uv`. This needs outbound HTTPS to
+  GitHub at that moment; the image ships `git` for it, and the bundled upstream
+  `aioslimproto` is removed so the install applies cleanly on the first load.
+  The install lasts for the life of the container and is re-done when the
+  container is recreated.
 - The stream server defaults to TCP **8097**; if that port is taken, change it in
   Settings -> System -> Streams.
 - Wi-Fi players sync well but can show periodic ~30-50 ms corrections

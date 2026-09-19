@@ -6,6 +6,12 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends git \
  && rm -rf /var/lib/apt/lists/*
 
+# Remove the bundled upstream aioslimproto so the provider's git+ requirement is
+# installed cleanly on first load. If it stayed installed, its `const` submodule
+# would already be cached when the first import fails, and the retry after the
+# install would not see the patched constants.
+RUN /app/venv/bin/uv pip uninstall aioslimproto
+
 # Patched squeezelite provider: LMS-style sync + sync-group member mime fix.
 COPY squeezelite/player.py /app/venv/lib/python3.14/site-packages/music_assistant/providers/squeezelite/player.py
 
