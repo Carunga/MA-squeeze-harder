@@ -1,0 +1,67 @@
+From 57015fe152a896c1fcdd1c1939a8c3fb4d313a5f Mon Sep 17 00:00:00 2001
+From: seb <sebastian.merz@web.de>
+Date: Sat, 19 Sep 2026 21:45:06 +0200
+Subject: [PATCH 1/2] Fix mime type for sync-group member streams
+
+The sync-group member URL has no file extension, so deriving the mime type
+by splitting the URL produced a bogus value (e.g.
+audio/103:8098/slimproto/multi). Squeezelite tolerated it, but the Squeezebox
+Radio's decoder rejected the stream and never played it in a sync group.
+
+Pass the member codec's mime explicitly; fall back to the url-derived mime
+when not provided.
+---
+ music_assistant/providers/squeezelite/player.py | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/music_assistant/providers/squeezelite/player.py b/music_assistant/providers/squeezelite/player.py
+index 0ecc334ac..e819e3c81 100644
+--- a/music_assistant/providers/squeezelite/player.py
++++ b/music_assistant/providers/squeezelite/player.py
+@@ -335,6 +335,7 @@ class SqueezelitePlayer(Player):
+                         send_flush=True,
+                         auto_play=False,
+                         is_group_playback=True,
++                        mime_type=get_mime_type(member_codec),
+                     )
+                 )
+ 
+@@ -475,8 +476,15 @@ class SqueezelitePlayer(Player):
+         send_flush: bool = True,
+         auto_play: bool = False,
+         is_group_playback: bool = False,
++        mime_type: str | None = None,
+     ) -> None:
+         """Handle playback of an url on slimproto player(s)."""
++        if mime_type is None:
++            # derive from the url extension (only reliable for plain file urls; sync
++            # group member urls have no extension, so callers pass the codec mime)
++            mime_type = get_mime_type(
++                url.rsplit(".", maxsplit=1)[-1].split("?", maxsplit=1)[0]
++            )
+         metadata = {
+             "item_id": media.uri,
+             "title": media.title,
+@@ -501,7 +509,7 @@ class SqueezelitePlayer(Player):
+             target_player._low_latency_stream = low_latency_stream
+         await slimplayer.play_url(
+             url=url,
+-            mime_type=get_mime_type(url.rsplit(".", maxsplit=1)[-1].split("?", maxsplit=1)[0]),
++            mime_type=mime_type,
+             metadata=metadata,
+             enqueue=enqueue,
+             send_flush=send_flush,
+@@ -525,9 +533,7 @@ class SqueezelitePlayer(Player):
+                 0.2,
+                 slimplayer.play_url(
+                     url=url,
+-                    mime_type=get_mime_type(
+-                        url.rsplit(".", maxsplit=1)[-1].split("?", maxsplit=1)[0]
+-                    ),
++                    mime_type=mime_type,
+                     metadata=metadata,
+                     enqueue=True,
+                     send_flush=False,
+-- 
+2.42.0
+

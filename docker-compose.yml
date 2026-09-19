@@ -1,0 +1,13 @@
+services:
+  music-assistant:
+    build: .
+    container_name: ma-squeeze-harder
+    restart: unless-stopped
+    # host networking is REQUIRED for SlimProto discovery and audio streaming
+    network_mode: host
+    environment:
+      - LOG_LEVEL=info
+    volumes:
+      - ./data:/data
+      # Optional: expose local music files to the Filesystem provider
+      # - /path/to/music:/media:ro
