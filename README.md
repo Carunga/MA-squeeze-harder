@@ -71,6 +71,11 @@ tightest result use a wired player as the group leader.
   an **admin** account.
 - Tested with squeezelite (wired, pCP) and a Squeezebox Radio (WiFi, FW 8.5.3).
 
+## Docs
+
+- [docs/plan.md](docs/plan.md) — the LMS-faithful sync plan and the L1/L2/L3 validation notes
+- [docs/CHANGES-first-working-version.md](docs/CHANGES-first-working-version.md) — dated changelog of the first working version
+
 ## Patches / source
 
 - Patched library: `github.com/Carunga/aioslimproto` branch `better-squeeze-sync`
