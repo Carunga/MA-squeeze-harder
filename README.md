@@ -24,6 +24,7 @@ Squeezebox Radio (WiFi) hold ~1 ms with occasional ~30-50 ms corrections.
 - **host networking** (required for SlimProto discovery/streaming); MA and all
   players on the same L2 subnet
 - **only one** MA/SlimProto server per network
+- outbound HTTPS to `github.com` on first start (see Notes)
 
 ## Build and run
 
@@ -38,6 +39,8 @@ Then open `http://<host-ip>:8095` and complete onboarding (create an admin user)
 ## Add players
 
 - Settings -> Player Providers -> add **Squeezelite**.
+  On adding the provider, MA installs the patched `aioslimproto` from the fork
+  listed in the provider manifest (this is the `git+https://...` requirement).
 - Software players: point them at `<host-ip>:3483` (squeezelite `-s`).
 - Hardware Squeezebox players: they discover the server via broadcast, so make
   sure no other MA/LMS is running on the network.
@@ -54,6 +57,11 @@ tightest result use a wired player as the group leader.
 
 ## Notes / caveats
 
+- On first provider load MA fetches the patched `aioslimproto` from
+  `github.com/Carunga/aioslimproto` via the manifest `requirements` entry
+  (`aioslimproto @ git+https://...@<sha>`), installed with `uv`. This needs
+  outbound HTTPS to GitHub at that moment; it is cached in the `/data` volume's
+  environment afterwards.
 - The stream server defaults to TCP **8097**; if that port is taken, change it in
   Settings -> System -> Streams.
 - Wi-Fi players sync well but can show periodic ~30-50 ms corrections
@@ -63,9 +71,11 @@ tightest result use a wired player as the group leader.
   an **admin** account.
 - Tested with squeezelite (wired, pCP) and a Squeezebox Radio (WiFi, FW 8.5.3).
 
-## Patches
+## Patches / source
 
-- `patches/aioslimproto/` - library changes (branch `better-squeeze-sync`)
-- `patches/server/` - provider changes: 2 commits (mime fix, then sync integration)
+- Patched library: `github.com/Carunga/aioslimproto` branch `better-squeeze-sync`
+  (see `patches/aioslimproto/`). The provider manifest pins its commit.
+- Patched provider: `patches/server/` (3 commits: mime fix, sync integration,
+  requirement).
 
-Based on Music Assistant 2.10.4 and aioslimproto 3.2.2. Apache-2.0, same as upstream.
+Based on Music Assistant 2.10.4. Apache-2.0, same as upstream.

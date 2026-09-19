@@ -137,9 +137,7 @@ class SqueezelitePlayer(Player):
         """Handle logic when the PlayerConfig is first loaded or updated."""
         # map the per-player sync delay setting to the LMS play delay
         self.client.play_delay = int(
-            self.mass.config.get_raw_player_config_value(
-                self.player_id, CONF_SYNC_ADJUST, 0
-            )
+            self.mass.config.get_raw_player_config_value(self.player_id, CONF_SYNC_ADJUST, 0)
         )
         # set presets and display
         await self._set_preset_items()
@@ -480,9 +478,7 @@ class SqueezelitePlayer(Player):
         if mime_type is None:
             # derive from the url extension (only reliable for plain file urls; sync
             # group member urls have no extension, so callers pass the codec mime)
-            mime_type = get_mime_type(
-                url.rsplit(".", maxsplit=1)[-1].split("?", maxsplit=1)[0]
-            )
+            mime_type = get_mime_type(url.rsplit(".", maxsplit=1)[-1].split("?", maxsplit=1)[0])
         metadata = {
             "item_id": media.uri,
             "title": media.title,

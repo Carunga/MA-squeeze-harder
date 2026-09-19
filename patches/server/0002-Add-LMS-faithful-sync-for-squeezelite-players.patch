@@ -1,7 +1,7 @@
-From 859e8670c71e80ee575ff76b0c32f83ea64e71cb Mon Sep 17 00:00:00 2001
+From 8037ed16d60e0718b526866590eddb595a3a8368 Mon Sep 17 00:00:00 2001
 From: seb <sebastian.merz@web.de>
-Date: Sat, 19 Sep 2026 21:45:06 +0200
-Subject: [PATCH 2/2] Add LMS-faithful sync for squeezelite players
+Date: Sat, 19 Sep 2026 22:15:07 +0200
+Subject: [PATCH 2/3] Add LMS-faithful sync for squeezelite players
 
 - use the aioslimproto SyncGroup (player<->server clock mapping, play
   points, coordinated start, steady-state drift correction)
@@ -12,11 +12,11 @@ Subject: [PATCH 2/2] Add LMS-faithful sync for squeezelite players
 - remove the old average-elapsed-diff sync, pause_and_unpause workaround
   and the WiiM pause hack
 ---
- .../providers/squeezelite/player.py           | 125 +++---------------
- 1 file changed, 15 insertions(+), 110 deletions(-)
+ .../providers/squeezelite/player.py           | 123 ++----------------
+ 1 file changed, 13 insertions(+), 110 deletions(-)
 
 diff --git a/music_assistant/providers/squeezelite/player.py b/music_assistant/providers/squeezelite/player.py
-index e819e3c81..ca9dfe924 100644
+index 0c6c34fc9..96fa55757 100644
 --- a/music_assistant/providers/squeezelite/player.py
 +++ b/music_assistant/providers/squeezelite/player.py
 @@ -3,10 +3,8 @@
@@ -70,20 +70,18 @@ index e819e3c81..ca9dfe924 100644
          self._audio_source_active: bool = False
          self._low_latency_stream: bool = False
          # TEMP: patch slimclient send_strm to adjust buffer thresholds
-@@ -141,6 +135,12 @@ class SqueezelitePlayer(Player):
+@@ -141,6 +135,10 @@ class SqueezelitePlayer(Player):
  
      async def on_config_updated(self) -> None:
          """Handle logic when the PlayerConfig is first loaded or updated."""
 +        # map the per-player sync delay setting to the LMS play delay
 +        self.client.play_delay = int(
-+            self.mass.config.get_raw_player_config_value(
-+                self.player_id, CONF_SYNC_ADJUST, 0
-+            )
++            self.mass.config.get_raw_player_config_value(self.player_id, CONF_SYNC_ADJUST, 0)
 +        )
          # set presets and display
          await self._set_preset_items()
          await self._set_display()
-@@ -334,7 +334,6 @@ class SqueezelitePlayer(Player):
+@@ -334,7 +332,6 @@ class SqueezelitePlayer(Player):
                          media=media,
                          send_flush=True,
                          auto_play=False,
@@ -91,7 +89,7 @@ index e819e3c81..ca9dfe924 100644
                          mime_type=get_mime_type(member_codec),
                      )
                  )
-@@ -475,7 +474,6 @@ class SqueezelitePlayer(Player):
+@@ -475,7 +472,6 @@ class SqueezelitePlayer(Player):
          enqueue: bool = False,
          send_flush: bool = True,
          auto_play: bool = False,
@@ -99,7 +97,7 @@ index e819e3c81..ca9dfe924 100644
          mime_type: str | None = None,
      ) -> None:
          """Handle playback of an url on slimproto player(s)."""
-@@ -518,12 +516,6 @@ class SqueezelitePlayer(Player):
+@@ -516,12 +512,6 @@ class SqueezelitePlayer(Player):
              # to coordinate a start of multiple synced players
              autostart=auto_play,
          )
@@ -112,7 +110,7 @@ index e819e3c81..ca9dfe924 100644
          # if queue is set to single track repeat,
          # immediately set this track as the next
          # this prevents race conditions with super short audio clips (on single repeat)
-@@ -559,7 +551,7 @@ class SqueezelitePlayer(Player):
+@@ -557,7 +547,7 @@ class SqueezelitePlayer(Player):
              self.update_state()
  
          # handle sync
@@ -121,7 +119,7 @@ index e819e3c81..ca9dfe924 100644
              self._handle_sync()
  
      async def _handle_buffer_ready(self) -> None:
-@@ -588,14 +580,8 @@ class SqueezelitePlayer(Player):
+@@ -586,14 +576,8 @@ class SqueezelitePlayer(Player):
                  break
              count += 1
  
@@ -138,7 +136,7 @@ index e819e3c81..ca9dfe924 100644
  
      async def _handle_player_cli_event(self, event: SlimEvent) -> None:
          """Process CLI Event."""
-@@ -642,79 +628,10 @@ class SqueezelitePlayer(Player):
+@@ -640,79 +624,10 @@ class SqueezelitePlayer(Player):
          self.logger.log(VERBOSE_LOG_LEVEL, "CLI Event: %s", event_data)
  
      def _handle_sync(self) -> None:
@@ -221,7 +219,7 @@ index e819e3c81..ca9dfe924 100644
  
      async def _set_preset_items(self) -> None:
          """Set the presets for a player."""
-@@ -789,18 +706,6 @@ class SqueezelitePlayer(Player):
+@@ -787,18 +702,6 @@ class SqueezelitePlayer(Player):
          )
  
  
