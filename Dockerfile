@@ -13,7 +13,7 @@ RUN apt-get update \
 
 # Tested revisions (see README). Override with --build-arg to try others.
 ARG SERVER_REPO=https://github.com/Carunga/server
-ARG SERVER_REV=918781da7a7226c30d3a3083a2d751548b20c8ec
+ARG SERVER_REV=08a43432d93ed15890b69ffae1631411cd9b0a03
 
 # Remove the bundled upstream aioslimproto. The patched provider imports
 # aioslimproto.sync, which does not exist upstream; that import fails on the
