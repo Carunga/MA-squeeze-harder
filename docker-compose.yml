@@ -1,9 +1,12 @@
 services:
   music-assistant:
     build: .
+    image: lmsma/music-assistant:lms-sync
     container_name: ma-squeeze-harder
     restart: unless-stopped
-    # host networking is REQUIRED for SlimProto discovery and audio streaming
+    # Host networking is REQUIRED for SlimProto discovery and audio streaming:
+    # players reach the server on port 3483 (UDP broadcast + TCP) and the web UI
+    # listens on 8095.
     network_mode: host
     environment:
       - LOG_LEVEL=info
