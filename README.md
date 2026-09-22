@@ -36,11 +36,14 @@ Squeezebox Radio (WiFi) hold ~1 ms with occasional ~30-50 ms corrections.
 
 ## Experimental: Sendspin bridge
 
-The Sendspin bridge is included but **off by default** and **not functional yet**.
-It is **Phase 1** only: it registers each Squeezelite player with the Sendspin
-server and wires the bridge role/timing/lifecycle, but the audio path, drift
-correction and robustness are still TODO, so it plays no audio. Leave the
-`sendspin_bridge` provider option disabled unless you are experimenting.
+The Sendspin bridge is included but **off by default** and still **experimental**.
+It registers each Squeezelite player as an external Sendspin client so it can take
+part in a Sendspin group, and it now has the **audio path**: the group's PCM is
+served to the device and started on the Sendspin timeline, with a drift monitor
+that nudges it back with skip/pause, live per-track title/artwork, and a
+**self-learning per-player lead**. It is not sample-accurate (SlimProto has no
+client-side scheduling), so expect near-sync (tens of ms), not perfection.
+Leave the `sendspin_bridge` provider option disabled unless you are experimenting.
 
 ## Home Assistant scripts menu
 
