@@ -9,6 +9,33 @@ The original Music Assistant sync was an approximation. This build ports Lyrion
 Music Server's server-side corrected sync into `aioslimproto` + the Squeezelite
 provider.
 
+## Repository layout
+
+Everything the image is built from is reachable from this repo:
+
+- `aioslimproto/` — **git submodule** of
+  [`github.com/Carunga/aioslimproto`](https://github.com/Carunga/aioslimproto),
+  branch `better-squeeze-power-mute-controls` (the LMS sync primitives, CLI/menu
+  fixes, and the power/mute/wake fixes).
+- `vendor/server/` — a **read-only copy** of the patched Music Assistant server
+  files from
+  [`github.com/Carunga/server`](https://github.com/Carunga/server), branch
+  `better-squeeze-power-mute-controls` (the patched Squeezelite provider + the
+  cache fix). Only the files the build uses are vendored.
+- `Dockerfile` / `docker-compose.yml` — the build.
+
+Clone with the submodule:
+
+```sh
+git clone --recurse-submodules <this repo>
+```
+
+If you already cloned without it:
+
+```sh
+git submodule update --init --recursive
+```
+
 ## What is fixed / added
 
 - player <-> server clock mapping via a min-latency jiffies estimator
@@ -68,11 +95,15 @@ selecting one runs the script.
 ## Build & run
 
 ```sh
-git clone <this repo>
+git clone --recurse-submodules <this repo>
 cd MA-squeeze-harder
 docker compose up -d --build
 docker compose logs -f music-assistant
 ```
+
+The `aioslimproto/` submodule is included for reading/development; the image
+build itself pins the exact revisions it ships (see *Source* below), so the
+submodule checkout does not change what gets built.
 
 Then open the web UI at `http://<host-ip>:8095` and complete onboarding (create
 an admin user).
@@ -124,16 +155,28 @@ group leader.
 - The Sendspin bridge is experimental and disabled by default (see above).
 - Tested with squeezelite (wired, pCP) and a Squeezebox Radio (WiFi, FW 8.5.3).
 
-## Source branches
+## Source
 
-Both forks are pinned in the image:
+### Development branches (mirrored by the submodule / vendored copy)
 
-- `github.com/Carunga/aioslimproto` branch `better-squeeze-sync`
-  (`7ca0729be24e4dc613a88415b1a076e5d9b1c537`) - LMS sync primitives + CLI fix.
-  The provider manifest's `requirements` entry pins this commit.
-- `github.com/Carunga/server` branch `feat/squeezelite-all`
-  (`713192f810ab03d66186cda797df7e8d7a8aa261`) - the patched Squeezelite provider,
-  the cache fix and the mime/transport/menu changes. This is also the revision
-  cloned by the Dockerfile (override with `--build-arg SERVER_REV=...`).
+- `github.com/Carunga/aioslimproto` branch `better-squeeze-power-mute-controls`
+  (`04bd13aceca2bb8a9b54e68331df411081625721`) - LMS sync primitives, the
+  CLI/menu fixes, mute via zero gain, and the power/wake fixes (status +
+  home-menu push on power changes, LMS-aligned `aude`).
+- `github.com/Carunga/server` branch `better-squeeze-power-mute-controls`
+  (`52bfbb2b8e7e235b2b9e897e5a0bb96dd7f8913b`) - the patched Squeezelite
+  provider (sync, SqueezePlay menus, group-aware transport, native mute, the
+  `playerpower` home entry) plus the expired-empty-collection cache fix.
+
+### Image build pins (what the Docker image actually ships)
+
+For reproducibility the image does **not** build the development branches; it
+pins tested revisions:
+
+- `github.com/Carunga/server` at
+  `7740615c23e265dd9be05ea589fa1e1d9c90b836` — the `SERVER_REV` build arg in
+  `Dockerfile` (override with `--build-arg SERVER_REV=...`).
+- `github.com/Carunga/aioslimproto` at the commit pinned by that revision's
+  provider `requirements` entry (installed into the venv on first provider load).
 
 Based on Music Assistant 2.10.4. Apache-2.0, same as upstream.

@@ -1,0 +1,4 @@
+[submodule "aioslimproto"]
+	path = aioslimproto
+	url = https://github.com/Carunga/aioslimproto.git
+	branch = better-squeeze-power-mute-controls
