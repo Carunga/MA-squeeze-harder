@@ -157,26 +157,17 @@ group leader.
 
 ## Source
 
-### Development branches (mirrored by the submodule / vendored copy)
-
-- `github.com/Carunga/aioslimproto` branch `better-squeeze-power-mute-controls`
-  (`04bd13aceca2bb8a9b54e68331df411081625721`) - LMS sync primitives, the
-  CLI/menu fixes, mute via zero gain, and the power/wake fixes (status +
-  home-menu push on power changes, LMS-aligned `aude`).
 - `github.com/Carunga/server` branch `better-squeeze-power-mute-controls`
-  (`52bfbb2b8e7e235b2b9e897e5a0bb96dd7f8913b`) - the patched Squeezelite
+  (`acc6efcdf7196af81e08e02156e66ae56055e7b5`) — the patched Squeezelite
   provider (sync, SqueezePlay menus, group-aware transport, native mute, the
-  `playerpower` home entry) plus the expired-empty-collection cache fix.
-
-### Image build pins (what the Docker image actually ships)
-
-For reproducibility the image does **not** build the development branches; it
-pins tested revisions:
-
-- `github.com/Carunga/server` at
-  `7740615c23e265dd9be05ea589fa1e1d9c90b836` — the `SERVER_REV` build arg in
-  `Dockerfile` (override with `--build-arg SERVER_REV=...`).
-- `github.com/Carunga/aioslimproto` at the commit pinned by that revision's
-  provider `requirements` entry (installed into the venv on first provider load).
+  `playerpower` home entry) plus the expired-empty-collection cache fix. This is
+  the revision the image builds (`SERVER_REV` in `Dockerfile`, override with
+  `--build-arg SERVER_REV=...`), mirrored under `vendor/server/`.
+- `github.com/Carunga/aioslimproto` branch `better-squeeze-power-mute-controls`
+  (`04bd13aceca2bb8a9b54e68331df411081625721`) — LMS sync primitives, the
+  CLI/menu fixes, mute via zero gain, and the power/wake fixes (status +
+  home-menu push on power changes, LMS-aligned `aude`). The server revision's
+  provider `requirements` entry pins this exact commit, so it is installed into
+  the venv on first provider load; the `aioslimproto/` submodule mirrors it.
 
 Based on Music Assistant 2.10.4. Apache-2.0, same as upstream.

@@ -13,6 +13,6 @@ Only the files the build actually copies are vendored:
   cache fix.
 
 Source: `github.com/Carunga/server`, branch `better-squeeze-power-mute-controls`
-(`52bfbb2b8e7e235b2b9e897e5a0bb96dd7f8913b`).
+(`acc6efcdf7196af81e08e02156e66ae56055e7b5`).
 
 Music Assistant is licensed under Apache-2.0; these files retain that license.
